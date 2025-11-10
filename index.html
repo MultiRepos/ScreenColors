@@ -138,6 +138,7 @@
             font-size: 0.9rem;
         }
         
+        /* Fullscreen mode styles */
         .fullscreen-mode {
             background-color: var(--fullscreen-color);
             display: flex;
@@ -147,6 +148,10 @@
             width: 100vw;
             margin: 0;
             padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
         }
         
         .hidden {
@@ -243,15 +248,20 @@
         
         // Fullscreen function
         function enterFullscreen() {
+            // Create fullscreen overlay
+            const fullscreenOverlay = document.createElement('div');
+            fullscreenOverlay.id = 'fullscreenOverlay';
+            fullscreenOverlay.className = 'fullscreen-mode';
+            fullscreenOverlay.style.backgroundColor = currentColor;
+            document.body.appendChild(fullscreenOverlay);
+            
+            // Hide the container
+            container.classList.add('hidden');
+            
             // Update URL with color parameter
             const newUrl = new URL(window.location);
             newUrl.searchParams.set('color', currentColor);
             window.history.replaceState({}, '', newUrl);
-            
-            // Apply fullscreen color and hide UI
-            document.body.classList.add('fullscreen-mode');
-            document.body.style.setProperty('--fullscreen-color', currentColor);
-            container.classList.add('hidden');
             
             // Request fullscreen
             if (document.documentElement.requestFullscreen) {
@@ -273,14 +283,19 @@
                                 document.msFullscreenElement;
             
             if (!isFullscreen) {
+                // Remove fullscreen overlay
+                const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+                if (fullscreenOverlay) {
+                    fullscreenOverlay.remove();
+                }
+                
+                // Show UI again
+                container.classList.remove('hidden');
+                
                 // Remove color parameter from URL when exiting fullscreen
                 const newUrl = new URL(window.location);
                 newUrl.searchParams.delete('color');
                 window.history.replaceState({}, '', newUrl);
-                
-                // Show UI again
-                document.body.classList.remove('fullscreen-mode');
-                container.classList.remove('hidden');
             }
         }
         
